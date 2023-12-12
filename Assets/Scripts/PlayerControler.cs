@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class PlayerControler : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class PlayerControler : MonoBehaviour
     private Rigidbody playerRb;
     private GameObject focalPoint;
     public bool powerup=false;
+    public GameObject GameOverPenal;
+
+    PhotonView view;
 
     public GameObject powerupIndector;
     // Start is called before the first frame update
@@ -17,15 +21,25 @@ public class PlayerControler : MonoBehaviour
        
         playerRb = GetComponent<Rigidbody>();
         focalPoint = GameObject.Find("Focal Point");
+        view=GetComponent<PhotonView>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        float forwardInput = Input.GetAxis("Vertical");
-        playerRb.AddForce(focalPoint.transform.forward *forwardInput * speed);
+        if (view.IsMine)
+        {
+            float forwardInput = Input.GetAxis("Vertical");
+            playerRb.AddForce(focalPoint.transform.forward * forwardInput * speed);
 
-        powerupIndector.transform.position = transform.position + new Vector3(0, -0.28f, 0);
+            powerupIndector.transform.position = transform.position + new Vector3(0, -0.28f, 0);
+            if (transform.position.y < -10)
+            {
+                Destroy(gameObject);
+                GameOverPenal.SetActive(true);
+            }
+        }
+        
     }
     private void OnTriggerEnter(Collider other)
     {
